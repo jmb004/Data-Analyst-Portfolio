@@ -8,3 +8,5 @@ Projects:
 (keyword_ranking.py) - to search the HTML of candidate sites for a keyword and return string of each occurence.
 
 (JBalog_Project_CardioGoodFitness.ipynb) - Project for GreatLearning DS/BA course. Using EDA.
+
+(JBalog_Project_Project_BusinessStatistics_AxisInsurance) - Project for GreatLearning DS/BA course using Statistics.
