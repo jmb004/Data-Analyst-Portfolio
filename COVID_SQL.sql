@@ -1,3 +1,14 @@
+/*
+Alex the Analyst Tutorial (https://www.youtube.com/watch?v=qfyynHBFOsM&t=404s)
+
+Link to Dataset: https://ourworldindata.org/covid-deaths
+Link to GitHub: https://bit.ly/3xNwzGK
+
+EDA on COVID data using different syntax in SQL Server 2019 and MS Server Management Studio 18
+
+*/
+
+
 -- Pull and view the COVID19 deaths .csv
 SELECT *
 From portfolioProject..['owid-covid-deaths$']
