@@ -1,5 +1,5 @@
 # data_analysis
-Python, R
+Python, R, SQL
 
 Projects: 
 
@@ -10,3 +10,5 @@ Projects:
 (JBalog_Project_CardioGoodFitness.ipynb) - Project for GreatLearning DS/BA course. Using EDA.
 
 (JBalog_Project_Project_BusinessStatistics_AxisInsurance) - Project for GreatLearning DS/BA course using Statistics.
+
+(COVID_SQL) -- From Alex The Analyst Youtube Channel (https://youtu.be/qfyynHBFOsM) customized queries on COVID data.
