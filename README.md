@@ -12,3 +12,5 @@ Projects:
 (JBalog_Project_Project_BusinessStatistics_AxisInsurance) - Project for GreatLearning DS/BA course using Statistics.
 
 (COVID_SQL) -- From Alex The Analyst Youtube Channel (https://youtu.be/qfyynHBFOsM) customized queries on COVID data.
+
+(JBalog_Project_LinearRegression (1).ipynb) - Project for GreatLearning DS/BA course using Linear Regression (scikitlearn + statsmodel).
