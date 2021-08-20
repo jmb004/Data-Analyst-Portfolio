@@ -13,3 +13,9 @@ Python, R, SQL
 (COVID_SQL) -- From Alex The Analyst Youtube Channel (https://youtu.be/qfyynHBFOsM) customized queries on COVID data.
 
 (JBalog_Project_LinearRegression (1).ipynb) - Project for GreatLearning DS/BA course using Linear Regression (scikitlearn + statsmodel).
+
+(JBalog_SLC_AllBank_GLProject_Classification.ipynb) - Project for GreatLearning DS/BA course using Logistic Regression & Decision Trees.
+
+(JBalog_ET_Project_GTTravel_EnsembleTechniques.ipynb) - Project for GreatLearning DS/BA course using Ensemble Techniques & Under/Oversampling
+
+(JBalog_GLProject_ModelTuning_TheraBank.ipynb) - 
