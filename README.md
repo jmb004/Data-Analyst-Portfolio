@@ -16,6 +16,8 @@ Python, R, SQL
 
 (JBalog_SLC_AllBank_GLProject_Classification.ipynb) - Project for GreatLearning DS/BA course using Logistic Regression & Decision Trees.
 
-(JBalog_ET_Project_GTTravel_EnsembleTechniques.ipynb) - Project for GreatLearning DS/BA course using Ensemble Techniques & Under/Oversampling
+(JBalog_ET_Project_GTTravel_EnsembleTechniques.ipynb) - Project for GreatLearning DS/BA course using model ensemble techniques.
 
-(JBalog_GLProject_ModelTuning_TheraBank.ipynb) - 
+(JB_Credit_Card_Users_Churn_prediction.ipynb) - Project for GreatLearning DS/BA course using hyperparameter tuning & sampling techniques.
+
+(JBalog_GLProject_AllLifeBank_CustomerSegmentation.ipynb) - Project for GreatLearning DS/BA course using agglomeration hierarchical and k-means clustering techniques.
