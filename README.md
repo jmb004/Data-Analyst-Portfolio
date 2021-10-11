@@ -21,3 +21,5 @@ Python, R, SQL
 (JB_Credit_Card_Users_Churn_prediction.ipynb) - Project for GreatLearning DS/BA course using hyperparameter tuning & sampling techniques.
 
 (JBalog_GLProject_AllLifeBank_CustomerSegmentation.ipynb) - Project for GreatLearning DS/BA course using agglomeration hierarchical and k-means clustering techniques.
+
+(SQL_AdventureWorks.ipynb) - Project to pull data from MSQL db into Juypter Notebook to run Python for CRUD commands.
