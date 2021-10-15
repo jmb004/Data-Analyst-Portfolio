@@ -267,8 +267,114 @@ LIMIT 10
 
 # Ch.4 Exercises
 SELECT
-CASE WHEN
+	product_id,
+    product_name,
+CASE WHEN product_qty_type = 'unit' THEN 'unit'
+	ELSE 'bulk' 
+	END AS prod_qty_type_condensed
 FROM farmers_market.product
+
+SELECT
+	product_id,
+    product_name,
+CASE WHEN product_qty_type = 'unit' THEN 'unit'
+	ELSE 'bulk' 
+	END AS prod_qty_type_condensed,
+CASE WHEN product_name LIKE '%pepper%' THEN 1
+	ELSE 0
+    END pepper_flag
+FROM farmers_market.product
+
+# JOINS
+SELECT * 
+FROM farmers_market.product
+LEFT JOIN farmers_market.product_category
+	ON farmers_market.product.product_category_id = farmers_market.product_category.product_category_id
+    
+SELECT * 
+FROM farmers_market.product AS fmp
+LEFT JOIN farmers_market.product_category AS fmpc
+	ON fmp.product_category_id = fmpc.product_category_id
+    
+
+    
+# INNER JOIN
+SELECT *
+FROM customer AS c
+LEFT JOIN customer_purcahses AS cp
+	ON c.customer_id = cp.customer_id
+    
+SELECT c.*
+FROM customer AS c
+LEFT JOIN customer_purcahses AS cp
+	ON c.customer_id = cp.customer_id
+WHERE cp.customer_id IS NULL
+
+SELECT * 
+FROM customer AS c
+LEFT JOIN customer_purcahses AS cp
+	ON c.customer_id = cp.customer_id
+WHERE cp.customer_id > 0 # filter out customers without purchase
+
+# RIGHT JOIN
+SELECT *
+FROM customer AS c
+RIGHT JOIN customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+    
+# filter out by date
+SELECT c.*, cp.market_date
+FROM customer AS c
+LEFT JOIN customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+WHERE cp,market_date <> '2019-03-02' OR cp.market_date IS NULL # to get all customers to purchased and did not
+
+# get only a list of customers using DISTINCT
+SELECT DISTINCT c.*, cp.market_date
+FROM customer AS c
+LEFT JOIN customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+WHERE cp,market_date <> '2019-03-02' OR cp.market_date IS NULL
+
+# filter to booth, vendor, assignments
+SELECT
+	b.booth_number,
+    b.booth_type,
+    vba.market_date,
+    v.vendor_id,
+    v.vendor_name,
+    v.vendor_type
+FROM booth AS b
+LEFT JOIN vendor_booth_assignments AS vba
+	ON b.booth_number = vba.booth_number
+LEFT JOIN vendor AS v 
+	ON v.vendor_id = vba.vendor_id
+ORDER BY b.booth_number, vba.market_date
+
+# Ch. 5 Exercises
+SELECT *
+FROM vendor AS v
+INNER JOIN vendor_booth AS vb
+	ON v.vendor_id = vb.vendor_id
+ORDER BY v.vendor_name, vb.market_date
+
+SELECT *
+FROM customer_purchases AS cp
+LEFT JOIN customer AS c
+	ON c.customer_id = cp.customer_id
+
+# when of each product is available by type
+SELECT
+	market_date,
+    product_category_name,
+    vendor_location
+FROM product AS p
+LEFT JOIN product_category AS pc
+	ON p.product_id = pc.product_id
+LEFT JOIN vendor_inventory AS vi
+	ON p.vendor_id = vi.vendor_id
+WHERE pc.product_category_name = "Fresh Fruit & Vegetable"
+ORDER BY market_date
 
 
 
