@@ -376,6 +376,327 @@ LEFT JOIN vendor_inventory AS vi
 WHERE pc.product_category_name = "Fresh Fruit & Vegetable"
 ORDER BY market_date
 
+--- Chapter 6: Aggregations
+
+SELECT
+	market_date,
+    customer_id
+FROM farmers_market.customer_purchases
+GROUP BY market_date, customer_id
+ORDER BY market_date, customer_id
+
+--- group summaries
+-- count the rows in the customer_purchases table per market date per customer
+SELECT
+	market_date,
+    customer_id,
+    COUNT(*) AS items_purchased
+FROM farmers_market.customer_purchases
+GROUP BY market_date, customer_id
+ORDER BY market_date, customer_id
+LIMIT 10
+
+-- sum up the quantity column
+SELECT
+	market_date,
+    customer_id,
+    SUM(quantity) AS items_purchased
+FROM farmers_market.customer_purchases
+GROUP BY market_date, customer_id
+ORDER BY market_date, customer_id
+LIMIT 10
+
+-- kinds of items purchased per customer on each market date
+SELECT
+	market_date,
+    customer_id,
+    COUNT( DISTINCT product_id) AS different_products_purchased
+FROM farmers_market.customer_purchases AS c
+GROUP BY market_date, customer_id
+ORDER BY market_date, customer_id
+LIMIT 10
+
+-- single query for summaries
+--- summarizing per market date per customer id
+SELECT
+	market_date,
+    customer_id,
+	SUM(quantity) AS items_purchased,
+    COUNT( DISTINCT product_id) AS different_products_purchased
+FROM farmers_market.customer_purchases AS c
+GROUP BY market_date, customer_id
+ORDER BY market_date, customer_id
+LIMIT 10
+
+--- calculations inside aggregate functions
+SELECT
+	market_date,
+    customer_id,
+	vendor_id,
+    quantity * cost_to_customer_per_qty AS price
+FROM farmers_market.customer_purchases AS c
+WHERE customer_id = 3
+ORDER BY market_date, vendor_id
+
+--- customer spend total on market date
+SELECT
+	customer_id,
+    market_date,
+	vendor_id,
+    SUM(quantity * cost_to_customer_per_qty) AS total_spent
+FROM farmers_market.customer_purchases AS c
+WHERE customer_id = 3
+GROUP BY market_date
+ORDER BY market_date
+
+---adding customer_id to groupby to see by vendor
+SELECT
+	customer_id,
+	vendor_id,
+    SUM(quantity * cost_to_customer_per_qty) AS total_spent
+FROM farmers_market.customer_purchases AS c
+WHERE customer_id = 3
+GROUP BY customer_id, vendor_id
+ORDER BY customer_id, vendor_id
+
+--- list of every customer and how much they have spent at the farmers market
+SELECT
+	customer_id,
+	SUM(quantity * cost_to_customer_per_qty) AS total_spent
+FROM farmers_market.customer_purchases
+GROUP BY customer_d
+ORDER BY customer_id
+
+--- join tables to bring in details
+SELECT c.customer_first_name,
+	c.customer_last_name,
+	cp.customer_id,
+	v.vendor_name,
+	cp.vendor_id,
+	cp.quantity * cp.cost_to_customer_per_qty AS price
+FROM farmers_market.customer AS c
+
+LEFT JOIN farmers_market.customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+LEFT JOIN farmers_market.vendor AS v
+	ON cp.vendor_id = v.vendor_id
+WHERE cp.customer_id = 3
+ORDER BY cp.customer_id, cp.vendor_id
+
+--- summarize at the level of one row per customer per vendor
+SELECT c.customer_first_name,
+	c.customer_last_name,
+	cp.customer_id,
+	v.vendor_name,
+	cp.vendor_id,
+	ROUND(SUM(quantity * cost_to_customer_per_qty), 2) AS total_spent
+	
+FROM farmers_market.customer AS c
+
+LEFT JOIN farmers_market.customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+LEFT JOIN farmers_market.vendor AS v
+	ON cp.vendor_id = v.vendor_id
+WHERE cp.customer_id = 3
+GROUP BY 
+	c.customer_first_name,
+	c.customer_last_name,
+	cp.customer_id,
+	v.vendor_name,
+	cp.vendor_id
+ORDER BY cp.customer_id, cp.vendor_id
+
+--- filter to single vendor
+SELECT c.customer_first_name,
+	c.customer_last_name,
+	cp.customer_id,
+	v.vendor_name,
+	cp.vendor_id,
+	ROUND(SUM(quantity * cost_to_customer_per_qty), 2) AS total_spent
+	
+FROM farmers_market.customer AS c
+
+LEFT JOIN farmers_market.customer_purchases AS cp
+	ON c.customer_id = cp.customer_id
+LEFT JOIN farmers_market.vendor AS v
+	ON cp.vendor_id = v.vendor_id
+WHERE cp.customer_id = 9
+GROUP BY 
+	c.customer_first_name,
+	c.customer_last_name,
+	cp.customer_id,
+	v.vendor_name,
+	cp.vendor_id
+ORDER BY cp.customer_id, cp.vendor_id
+
+--- Min/Max
+SELECT *
+FROM farmers_market.vendor_inventory
+ORDER BY original_price
+LIMIT 10
+
+--- least and most expensive in table
+SELECT
+	MIN(original_price) AS minimum_price,
+	MAX(original_price) AS maximum_price
+FROM farmers_market.vendor_inventory
+ORDER BY original_price
+
+--- lowest and highest prices in category
+SELECT
+	pc.product_category_name,
+	p.product_category_id,
+	MIN(vi.original_price) AS minimum_price,
+	MAX(vi.original_price) AS maximum_price
+FROM farmers_market.vendor_inventory AS vi
+INNER JOIN farmers_market.product AS p
+	ON vi.product_id = p.product_id
+INNER JOIN farmersmarket.product_category AS pc
+	ON p.product_category_id = pc.product_category_id
+GROUP BY pc.product_category_name, p.product_category_id
+
+--- COUNT AND COUNT DISTINCT
+SELECT market_date, COUNT(product_id) AS product_count
+FROM  farmers_market.vendor_inventory
+GROUP BY market_date
+ORDER BY market_date
+
+--- how many diff products with unique products IDS each vendor bought
+SELECT vendor_id,
+	COUNT(DISTINCT product_id) AS diff_prods_offered
+FROM farmers_market.vendor_inventory
+WHERE market_date BETWEEN '2019-03-02' AND '2019-03-16'
+GROUP BY vendor_id
+ORDER BY vendor_id
+
+--- Average
+SELECT vendor_id,
+	COUNT(DISTINCT product_id) AS diff_prods_offered,
+	AVG(original_price) AS avg_prod_price
+	
+FROM farmers_market.vendor_inventory
+WHERE market_date BETWEEN '2019-03-02' AND '2019-03-16'
+GROUP BY vendor_id
+ORDER BY vendor_id
 
 
+--- true average price of items in each vendors inventory between dates
+SELECT vendor_id,
+	COUNT(DISTINCT product_id) AS diff_prods_offered,
+	SUM(quantity * original_price) AS value_of_inventory,
+	SUM(quantity) AS inventory_item_count,
+	ROUND(SUM(quantity * original_price) / SUM(quantity), 2) AS average_item_price
+	
+FROM farmers_market.vendor_inventory
+WHERE market_date BETWEEN '2019-03-02' AND '2019-03-16'
+GROUP BY vendor_id
+ORDER BY vendor_id
 
+---- Filtering with HAVING
+SELECT 
+	vendor_id,
+	
+	COUNT(DISTINCT product_id) AS diff_prods_offered,
+	
+	SUM(quantity * original_price) AS value_of_inventory,
+	
+	SUM(quantity) AS inventory_item_count,
+	
+	ROUND(SUM(quantity * original_price) / SUM(quantity), 2) AS average_item_price
+	
+FROM farmers_market.vendor_inventory
+WHERE market_date BETWEEN '2019-03-02' AND '2019-03-16'
+GROUP BY vendor_id
+HAVING inventory_item_count>=100
+ORDER BY vendor_id
+
+
+--- CASE inside Aggregate functions
+SELECT
+	cp.market_date,
+	cp.vendor_id,
+	cp.customer_id,
+	cp.product_id,
+	cp.quantity,
+	p.product_name,
+	p.product_size,
+	p.product_qty_type
+FROM farmers_market.customer_purchases AS cp
+INNER JOIN farmers_market.product AS p
+	ON cp.product_id = p.product_id
+	
+--- one column that adds up quantities of products that are sold by unit and another that adds up quantities of prodeucts sold by pound
+SELECT
+	cp.market_date,
+	cp.vendor_id,
+	cp.customer_id,
+	cp.product_id,
+	CASE WHEN product_qty_type = "unit" THEN quantity ELSE 0 END AS quantity_units,
+	CASE WHEN product_qty_type = "lbs" THEN quantity ELSE 0 END AS quantity_lbs,
+	CASE WHEN product_qty_type NOT IN ("unit", "lbs") THEN quantity ELSE 0 END AS quantity_other,
+	p.product_qty_type
+FROM farmers_market.customer_purchases AS cp
+INNER JOIN farmers_market.product AS p
+	ON cp.product_id = p.product_id
+	
+
+SELECT
+	cp.market_date,
+	cp.vendor_id,
+	cp.customer_id,
+	cp.product_id,
+	CASE WHEN product_qty_type = "unit" THEN quantity ELSE 0 END AS quantity_units_purchased,
+	CASE WHEN product_qty_type = "lbs" THEN quantity ELSE 0 END AS quantity_lbs_purchased,
+	CASE WHEN product_qty_type NOT IN ("unit", "lbs") THEN quantity ELSE 0 END AS quantity_other,
+	p.product_qty_type
+FROM farmers_market.customer_purchases AS cp
+INNER JOIN farmers_market.product AS p
+	ON cp.product_id = p.product_id
+
+
+--- Ch 6. Exercises: query that determines how many times each vendor has rented a booth at the farmers market.
+SELECT 
+	DISTINCT(vendor_id),
+	COUNT(market_date) AS days_sold
+FROM farmers_market.vendor_booth_assignments
+GROUP BY vendor_id
+ORDER BY vendor_id
+
+------------------------
+SELECT 
+	fmpc.product_category_name, 
+	fmp.product_name,
+    MIN(fmcp.market_date) AS earliest_date_available,
+	MAX(fmcp.market_date) AS latest_date_available
+    
+FROM farmers_market.customer_purchases AS fmcp
+
+LEFT JOIN farmers_market.product AS fmp
+	ON fmcp.product_id = fmp.product_id
+    
+LEFT JOIN farmers_market.product_category AS fmpc
+	ON fmp.product_category_id = fmpc.product_category_id 
+
+GROUP BY 
+	fmpc.product_category_name,
+    fmp.product_name
+
+HAVING fmpc.product_category_name = "Fresh Fruits & Vegetables"
+
+----------------
+SELECT 
+	fmc.customer_last_name,
+    	fmc.customer_first_name,
+	SUM(fmcp.quantity * fmcp.cost_to_customer_per_qty) AS spend
+
+FROM farmers_market.customer AS fmc
+
+JOIN farmers_market.customer_purchases AS fmcp
+	ON fmcp.customer_id = fmc.customer_id
+
+GROUP BY 
+	fmc.customer_last_name,
+    fmc.customer_first_name
+    
+ORDER BY fmc.customer_last_name
+	
