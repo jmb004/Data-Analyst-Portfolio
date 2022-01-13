@@ -699,4 +699,117 @@ GROUP BY
     fmc.customer_first_name
     
 ORDER BY fmc.customer_last_name
+
+-------------------------
+
+Ch. 7: Windows Functions and Subqueries
+
+/* Row Number */
+SELECT vendor_id,
+MAX(original_price) AS highest_price
+FROM farmers_market.vendor_inventory
+GROUP BY vendor_id
+ORDER BY vendor_id
+
+SELECT vendor_id, market_date, product_id, original_price,
+	ROW_NUMBER() OVER (PARTITION BY vender_id ORDER BY original_price DESC)
+	AS price:rank
+FROM farmers_market.vendor_inventory 
+ORDER BY vendor_id, orignial_price DESC
+
+/* highest priced product per vendor */
+SELECT *
+FROM (SELECT vendor_id, market_date, product_id, original_price, ROW_NUMBER() OVER (PARTITION BY vendor_id ORDER BY original_price DESC)
+      AS price:rank
+	FROM farmers_market.vendor_inventory
+	ORDER BY vendor_id) x
+WHERE x.price:rank = 1
+
+/* Rank and Dense Rank: getting top 10 i.e., by price*/
+SELECT vendor_id, market_date, product_id, original_price,
+	RANK() OVER (PARTITION BY vender_id ORDER BY original_price DESC)
+	AS price:rank
+FROM farmers_market.vendor_inventory 
+ORDER BY vendor_id, orignial_price DESC
+
+/* NTILE: the nth record*/
+SELECT vendor_id, market_date, product_id, original_price,
+	NTILE(10) OVER (ORDER BY original_price DESC) AS price:ntile
 	
+FROM farmers_market.vendor_inventory
+ORDER BY original_price DESC
+
+/* Aggregate Window Fun */
+SELECT vendor_id, market_date, product_id, original_price, AVG(original_price) OVER (PARTITION BY market_date ORDER BY market_date)
+	AS avg_cost_product_market_date
+FROM farmers_market.vendor_inventory
+
+SELECT * FROM
+(
+	SELECT
+	
+	vendor_id,
+	
+	market_date,
+	
+	product_id,
+	
+	original_price,
+	
+	ROUND(AVG(original_price) OVER
+	      (PARTITION BY market_date ORDER BY
+	       market_date), 2)
+	AS average_cost_product_by_market_date
+	
+	FROM farmers_market.vendor_inventory
+	) x
+WHERE x.vendor_id = 1
+		AND x.original_price>x.verage_cost_product_by_market_date 
+ORDER BY x.market_date, x.original_price
+DESC
+
+SELECT vendor_id, market_date, product_id, original_price,
+	COUNT(product_id) OVER (PARTITION BY market_date, vendor_id) vendor_product_count_per_market_date
+FROM farmers_market.vendor_inventory
+ORDER BY vendor_id, market_date, original_price DESC
+
+SELECT customer_id,
+	market_date,
+	vendor_id,
+	product_id,
+	quantity * cost_to_customer_per_qty AS price,
+	SUM(quantity ( cost_to_customer_per_qty) OVER (ORDER BY
+						       market_date, transaction_time, customer_id, product_id) AS running_total_purchases
+FROM farmers_market.customer_purchases
+
+SELECT customer_id,
+	    market_date,
+	    vendor_id,
+	    product_id,
+	    quantity * cost_to_customer_per_qty AS price,
+	    SUM(quantity * cost_to_customer_per_qty) OVER(PARTITION BY customer_id ORDER BY market_date, transaction_time, product_id) AS 
+	    customer_spend_running_total
+FROM farmers_market.customer_purchases
+	    
+SELECT customer_id, market_date, vendor_id, product_id, ROUND(quantity * cost_to_customer_per_qty, 2) AS price,
+	    ROUND(SUM(quantity * cost_to_customer_per_qty) OVER (PARTITION BY customer_id), 2) AS customer_spend_total
+FROM farmers_market.customer_purchases
+	 
+/* LAG and LEAD */
+SELECT
+	    market_date,
+	    vendor_id,
+	    booth_number,
+	    LAG(booth_number, 1) OVER (PARTITION BY vendor_id ORDER BY market_date, vendor_id) AS previous_booth_number
+FROM farmers_market.vendor_booth_assignments
+ORDER BY market_date, vendor_id, booth_number
+	    
+SELECT * FROM
+	    ( SELECT
+	     market_date,
+	     vendor_id,
+	     booth_number,
+	     LAG(booth_number,1) OVER (PARTITION BY vendor_id ORDER BY market_date, vendor_id) AS previous_booth_number
+	     FROM farmers_market.vendor_booth_assignments
+	     ORDER BY market_date, vendor_id, booth_number ) x
+WHERE x.market_date = '2019-04-10' AND (x.booth_number <> x.previous_booth_number OR x.previous_booth_number IS NULL)
