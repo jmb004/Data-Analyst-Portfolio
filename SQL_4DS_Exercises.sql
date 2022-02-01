@@ -813,3 +813,118 @@ SELECT * FROM
 	     FROM farmers_market.vendor_booth_assignments
 	     ORDER BY market_date, vendor_id, booth_number ) x
 WHERE x.market_date = '2019-04-10' AND (x.booth_number <> x.previous_booth_number OR x.previous_booth_number IS NULL)
+	    
+SELECT market_date,
+	    SUM(quantity * cost_to_customer_per_qty) AS market_date_total_sales
+FROM farmers_market.customer_purchases
+GROUP BY market_date
+ORDER BY market_date
+	 
+SELECT market_date,
+	    SUM( quantity * cost_to_customer_per_qty) AS market_date_total_sales,
+	    LAG(SUM(quantity * cost_to_customer_per_qty), 1)
+	    OVER(ORDER BY market_date) AS previous_market_date_total_sales
+FROM farmers_market.customer_purchases
+GROUP BY market_date
+ORDER BY market_date
+	    
+/* Date and Time Functions */
+CREATE TABLE
+	    farmers_market.datetime_demo AS
+	    ( SELECT market_date, market_start_time, market_end_time,
+	     STR_TO_DATE(CONCAT(market_date, ' ', market_start_time), '%Y-%m-%d %h:%i %p')
+	     AS market_start_datetime,
+	     STR_TO_DATE(CONCAT(market_date, ' ', market_end_time), '%Y-%m-%d %h:%i %p')
+	     AS market_end_datetime
+	     FROM farmers_market.market_date_info)
+
+/* extract and date_part */
+SELECT market_start_datetime,
+	    EXTRACT(DAY FROM market_start_datetime) AS mktsrt_day,
+	    EXTRACT(MONTH FROM market_start_datetime) AS mktsrt_month,
+	    EXTRACT(YEAR FROM market_start_datetime) AS mktsrt_year,
+	    EXTRACT(HOUR FROM market_start_datetime) AS mktsrt_hour,
+	    EXTRACT(MINUTE FROM market_start_datetime) AS mktsrt_minute
+FROM farmers_market.datetime_demo
+WHERE market_start_datetime = '2019-03-02 07:00:00'
+
+SELECT market_start_datetime,
+	    DATE(market_start_datetime) AS mktsrt_date,
+	    TIME(market_start_datetime) AS mktsrt_time
+FROM farmers_market.datetime_demo
+WHERE market_start_datetime ='2019-03-02 08:00:00'
+
+/* date_add and date_sub */
+SELECT market_start_datetime,
+	    DATE_ADD(market_start_datetime, INTERVAL 30 MINUTE) AS mktstrt_date_plus_30min
+FROM farmers_market.datetime_demo
+WHERE market_start_datetime = '2019-03-02 08:00:00'
+	   
+SELECT market_start_datetime,
+	    DATE_ADD(market_start_datetime,
+		     INTERVAL 30 DAY) AS mktstrt_date_plus_30days
+FROM farmers_market.datetime_demo
+WHERE market_start_datetime ='2019-03-03 08:00:00'
+
+SELECT market_start_datetime,
+	    DATE_ADD(market_start_datetime,
+		     INTERVAL -30 DAY) AS mkstrt_date_plus_neg30days,
+	    DATE_ADD(market_start_datetime,
+		     INTERVAL( 30 DAY) AS mktstrt_date_minus_30days
+FROM farmers_market.datetime_demo
+WHERE market_start_datetime = '2019-03-02 09:00:00'
+
+/* DATEDIFF */
+SELECT x.first_market,
+		     x.last_market,
+		     DATEDIF(x.last_market, x.first_market)
+		     days_first_to_last
+FROM ( SELECT min(market_start_datetime) first_market,
+      max(market_start_datetime) last_market
+      FROM farmers_market.datetime_demo) x
+		   
+/* MYSQL: timestampdiff */
+SELECT market_start_datetime,
+		     market_end_datetime,
+		     TIMESTAMPDIFF(HOUR, market_start_dateime, market_end_dateime)
+		     AS market_duration_hours,
+		     TIMESTAMPDIFF(MINUTE, market_start_datetime, market_end_datetime)
+		     AS market_duration_mins
+FROM farmers_market.datetime_demo
+	
+/* Summaries and Windows Function with dates */
+SELECT customer_id, market_date
+FROM farmers_market.customer_purchases
+WHERE customer_id = 1
+		  
+SELECT customer_id, MIN(market_date) as first_purchase
+		     MAX(market_date) as last_purchase
+		     COUNT(DISTINCT market_date) AS count_of_purchase_dates
+FROM farmers_market.customer_purchases
+WHERE customer_id = 1
+GROUP BY customer_id
+		    
+SELECT customer_id,
+		     MIN(market_date) as first_purchase,
+		     MAX(market_date) as last_purcahse,
+		     COUNT(DISTINCT market_date) AS count_pf_purchase_dates,
+		     DATEDIFF(MAX(market_date), MIN(market_date)) as days_between_first_last_purchase
+FROM farmers_market.customer_purchases
+GROUP BY customer_id
+		    
+SELECT customer_id,
+		     MIN(market_date) as first_purchase,
+		     MAX(market_date) AS last_purchase,
+		     COUNT(DISTINCT market_date) AS count_of_purchase_dates,
+		     DATEDIFF(MAX(market_date), 
+			      MIN(market_date)) as days_between_first_last_purchase,
+		     DATEDIFF(CURDATE(), MAX(market_date)) as days_since:last_purchase
+FROM farmers_market.customer_purchases
+GROUP BY customer_id
+		    
+SELECT customer_id, market_date, RANK() OVER (PARTITION BY customer_id, ORDER BY market_date) AS purchase_number,
+		     LEAD(market_date, 1) OVER (PARTITION BY customer_id ORDER BY market_date)
+		     AS next_purchase
+FROM farmers_market.customer_purchases
+WHERE customer_id = 1
+		     
