@@ -687,7 +687,7 @@ HAVING fmpc.product_category_name = "Fresh Fruits & Vegetables"
 SELECT 
 	fmc.customer_last_name,
     	fmc.customer_first_name,
-	SUM(fmcp.quantity * fmcp.cost_to_customer_per_qty) AS spend
+	SUM(fmc.quantity * fmc.cost_to_customer_per_qty) AS spend
 
 FROM farmers_market.customer AS fmc
 
@@ -928,3 +928,63 @@ SELECT customer_id, market_date, RANK() OVER (PARTITION BY customer_id, ORDER BY
 FROM farmers_market.customer_purchases
 WHERE customer_id = 1
 		     
+
+/* How many days pass between each customer's first and second purchase? */
+SELECT
+	a.customer_id,
+	a.market_date AS first_purchase,
+	a.next_purchase AS second_purchase,
+	DATEDIFF(a.next_purchase, a.market_date) AS time_between_1st_2nd_purchase
+FROM ( 
+	SELECT
+		x.customer_id,
+		x.market_date,
+		RANK() OVER (PARTITION BY x.customer_id ORDER BY x.market_date) AS purchase_number,
+		LEAD(x.market_date, 1) OVER (PARTITION BY x.customer_id ORDER BY x.market_date) AS next_purchase
+	FROM (
+		SELECT DISTINCT customer_id, market_date
+		FROM farmers_market.customer_purchases
+	) AS x
+) AS a
+WHERE a.purchase_number = 1
+
+/* List of one row per market date per customer within that date range */
+SELECT DISTINCT customer_id, market_date
+FROM farmer_market.customer_purchases
+WHERE DATEDIFF('2019-03-31', market_date) <= 31
+
+/* Query previous results and coutn the distinct market_date values per customer at that time */
+SELECT x.customer_id,
+	COUNT(DISTINCT x.market_date) AS market_count
+FROM (
+	SELECT DISTINCT Customer_id, market_date
+	FROM farmers_market.customer_purchases
+	WHERE DATEDIFF('2019-03-31', market_date) <= 31 ) AS x
+GROUP BY x.customer_id
+HAVING COUNT(DISTINCT market_date) = 1
+		     
+/* Every purchase in farmers market purchases table by customer_id, month and year */
+SELECT 
+	FMCP.customer_id,
+	EXTRACT(MONTH FROM market_start_datetime) AS mktsrt_month,
+	 EXTRACT(YEAR FROM market_start_datetime) AS mktsrt_year,
+FROM farmers_market.customer_purchases AS FMCP
+
+/* Purchases made int he past two week. Return earliest market_date as sale_since:date and sum of sales */
+SELECT	*
+	DATEDIFF(CURDATE(), MIN(FMCP.market_date)) AS sales_since:date
+	ROUND(SUM(FMCP.quantity * FMCP.cost_to_customer_per_qty)) 
+FROM farmers_market.customer_purchases AS FMCP
+WHERE FMCP.market_date >= GETDATE() - 14
+
+/* Quality Control query check mannually entered data for correctness */
+SELECT FMCP.market_date, FMCP.market_day, DAYNAME(FMCP.market_date)
+	CASE 
+		WHEN DAYNAME(CURDATE()) <> DAYNAME(market_date)
+		THEN DAYNAME(market_date)
+		ELSE DAYNAME(CURDATE()(
+	END
+FROM farmers_market.market_date_info AS FMCP
+
+
+
