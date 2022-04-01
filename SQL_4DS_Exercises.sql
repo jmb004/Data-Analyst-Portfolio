@@ -1125,3 +1125,85 @@ GROUP BY fvmi.vendor_id
 SELECT customer_id, SUM(quantity_sold)
 FROM farmers_market.customer_purchases AS fmcp
 GROUP BY fmcp.customer_id
+
+/* Ch. 9: EDA */
+SELECT  * FROM farmers_market.product
+LIMIT 10
+
+/* Primary key test: granularity test */
+SELECT product_id, count(*)
+FROM farmers_market.product
+GROUP BY product_id
+HAVING count(*) > 1
+
+SELECT * FROM farmers_market.product_category
+SELECT * FROM farmers_market.product
+
+/* Product count per category */
+SELECT pc.product_category_id, pc.product_category_name,
+	count(product_id) AS count_of_products
+FROM farmers_market.product_category AS pc
+LEFT JOIN farmers_market.product AS p
+	ON pc.product_category_id = p.product_category_id
+GROUP BY pc.product_category_id
+
+/* Quantity of types of products */
+SELECT DISTINCT product_qty_type
+FROM farmers_market.product
+
+/* Vendor ID table */
+SELECT * FROM farmers_market.vendor_inventory
+LIMIT 10
+
+/* Primary key test */
+SELECT market_date, vendor_id, product_id, count(*)
+FROM farmers_market.vendor_inventory
+GROUP BY market_date, vendor_id, product_id
+HAVING count(*) > 1 
+
+/* How far back does the data go? */
+SELECT min(market_date), max(market_date)
+FROM farmers_market.vendor_inventory
+
+/* Summary of vendor selling history */
+SELECT vendor_id, min(market_date), max(market_date)
+FROM farmers_market.vendory_inventory
+GROUP BY vendor_id
+ORDER BY  min(market_date), max(market_date)
+			
+/* When are vendors selling? */
+SELECT
+EXTRACT (YEAR FROM market_date) AS market_year,
+EXTRACT (MONTH FROM market_date) AS market_month,
+COUNT(DISTINCT vendor_id) AS vendors_with_inventory,
+FROM farmers_market5.vendor_inventory
+GROUP BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
+ORDER BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
+
+/* Vendor details */
+SELECT * FROM farmers_market.vendor_inventory
+WHERE vendor-id = 7
+ORDER BY market_date, product_id
+
+/* Purchase vs inventory */
+SELECT * FROM farmers_market.customer_purchases
+LIMIT 10
+
+SELECT * FROM farmers_market.customer_purchases
+WHERE vendor_id = 7 AND purchase_id = 4
+ORDER BY market_date, transaction_time
+
+SELECT * FROM farmers_market.customer_purchases
+WHERE vendor_id = 7 AND purchase_id = 4 AND customer_id = 12
+ORDER BY market_date, transaction_time, transaction_time
+
+/* Total sales */
+SELECT market_date, vendor_id, product_id, 
+	SUM(quantity) AS quantity_sold,
+	SUM(quantity * cost_to_customer_per_qty) AS total_sales
+FROM farmers_market.purchases
+WHERE vendor_id = 7 AND product_id = 4
+GROUP BY market_date, vendor_id, product id
+ORDER BY market_date, vendor_id, product id
+
+/* STOPPED A T PAGE 139 */
