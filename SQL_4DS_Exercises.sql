@@ -1247,10 +1247,30 @@ ORDER BY min(market_date), max(market_date)
 
 			
 SELECT
-EXTRACT (YEAR FROM market_date) AS market_year,
-EXTRACT (MONTH FROM market_date) AS market_month,
-DAYNAME(market_date) AS day_of_the_week
-COUNT(DISTINCT vendor_id) AS vendors_with_inventory,
-FROM farmers_market5.vendor_inventory
-GROUP BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
-ORDER BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
+	EXTRACT (HOUR FROM market_date) AS hour_of_the_day,
+	DAYNAME(market_date) AS day_of_the_week,
+	COUNT(DISTINCT vendor_id) AS vendors_with_inventory
+			
+FROM farmers_market.customer_purchases
+WHERE DAYNAME(market_date) = Wednesday AND DAYNAME(market_date) = Wednesday
+GROUP BY EXTRACT DAYNAME(market_date), EXTRACT (HOUR FROM market_date)
+ORDER BY EXTRACT DAYNAME(market_date), EXTRACT (HOUR FROM market_date)
+			
+SELECT
+FROM product
+WHERE
+GROUP BY
+ORDER BY
+			
+SELECT
+FROM vendor_inventory
+WHERE
+GROUP BY
+ORDER BY
+			
+SELECT
+FROM customer_purchases
+WHERE
+GROUP BY
+ORDER BY
+			
