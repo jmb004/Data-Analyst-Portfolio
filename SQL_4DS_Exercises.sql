@@ -1206,4 +1206,51 @@ WHERE vendor_id = 7 AND product_id = 4
 GROUP BY market_date, vendor_id, product id
 ORDER BY market_date, vendor_id, product id
 
-/* STOPPED A T PAGE 139 */
+/* Lookup Tables */
+SELECT vi.market_date,
+	vi.vendor_id,
+	v.vendor_name,
+	vi.product_id,
+	p.product_name,
+	vi.quantity AS quantity_availble,
+	sales.quantity_sold,
+	vi.original_price,
+	sales.total_sales
+FROM farmers_market.vendor_inventory AS vi
+	LEFT JOIN
+	(
+	SELECT market_date,
+	vendor_id,
+	product_id,
+	SUM(quantity) AS quantity_sold,
+	SUM(quantity * cost_to_customer_per_qty) AS total_sales
+	FROM farmers_market.customer_purchases
+	GROUP BY market_date, vendor_id, product_id
+	) AS sales
+	ON vi.market_date = sales.market_date
+	AND vi.vendor_id = sales.vendor_id
+	AND vi.product_id = sales.product_id
+	LEFT JOIN farmers_market.vendor v
+	ON vi.vendor_id = v.vendor_id
+	LEFT JOIN farmers_market.product p
+	ON vi.product_id = p.product_id
+WHERE vi.vendor_id = 7
+	AND vi.product_id = 4
+ORDER BY vi.market_date, vi.vendor_id, vi.product_id
+
+/* Ch. 9: Exercises */
+SELECT vendor_id, min(market_date), max(market_date)
+FROM farmers_market.customer_purchases
+GROUP BY vendor_id
+ORDER BY min(market_date), max(market_date)
+			
+
+			
+SELECT
+EXTRACT (YEAR FROM market_date) AS market_year,
+EXTRACT (MONTH FROM market_date) AS market_month,
+DAYNAME(market_date) AS day_of_the_week
+COUNT(DISTINCT vendor_id) AS vendors_with_inventory,
+FROM farmers_market5.vendor_inventory
+GROUP BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
+ORDER BY EXTRACT (YEAR FROM market_date), EXTRACT(MONTH FROM market_date)
