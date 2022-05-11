@@ -4,7 +4,7 @@ Python, R, SQL
 (Filename) - Description
 (scraper.py) - to scrape MI candidate website data to get websites to search and return HTML in text files.
 
-(keyword_ranking.py) - to search the HTML of candidate sites for a keyword and return string of each occurence.
+(keyword_ranking.py & scraper.py) - to search the HTML of candidate sites for a keyword and return string of each occurence.
 
 (JBalog_Project_CardioGoodFitness.ipynb) - Project for GreatLearning DS/BA course. Using EDA.
 
