@@ -2,6 +2,7 @@
 Python, R, SQL
 
 (Filename) - Description
+
 (2022_Housing_Analysis.ipynb) - Scrape of Zillow data to examine Grand Rapids area median home sale prices.
 
 (scraper.py) - to scrape MI candidate website data to get websites to search and return HTML in text files.
